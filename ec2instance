@@ -1,0 +1,25 @@
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "sam" {
+  count         = 3
+  ami           = "ami-053b0d53c279acc90"
+  instance_type = "t2.medium"
+  subnet_id     = aws_subnet.public_subnet.id
+  key_name      = "surajk8s"
+  security_groups = [aws_security_group.all_tcp.id]
+
+  root_block_device {
+    volume_size = 25
+  }
+
+  iam_instance_profile = "SSM"
+}
+
+output "public_ip" {
+  value = [for instance in aws_instance.sam : instance.public_ip]
+}
+
+
+

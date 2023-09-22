@@ -1,0 +1,30 @@
+resource "aws_vpc" "himvpc" {
+  cidr_block = "10.0.0.0/16" # Replace with your desired VPC CIDR block
+}
+
+resource "aws_subnet" "public_subnet" {
+  vpc_id     = aws_vpc.himvpc.id
+  cidr_block = "10.0.1.0/24" # Replace with your desired subnet CIDR block
+  availability_zone = "us-east-1a" # Change to your desired availability zone
+  map_public_ip_on_launch = true
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.himvpc.id
+}
+
+# Create a route table to associate with the public subnet
+resource "aws_route_table" "public_rt1" {
+  vpc_id = aws_vpc.himvpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+}
+
+# Associate the public route table with the public subnet
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_rt1.id
+}
